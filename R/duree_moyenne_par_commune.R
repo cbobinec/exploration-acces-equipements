@@ -31,6 +31,7 @@ DBI::dbDisconnect(conn, shutdown = TRUE)
 
 # Fusion avec le fond commune ---------------------------------------------
 duree_moyenne_par_commune_geo <- st_read("input/commune_reg_52_2025.gpkg") %>% 
+  st_transform(crs = 4326, "+init=epsg:3035") |> 
   left_join(
     y = duree_moyenne_par_commune,
     by = join_by(code == depcom)
@@ -46,4 +47,5 @@ seuils <- classIntervals(
   style="jenks"
 )
 
+message("Seuils Jenks calculés :")
 seuils
