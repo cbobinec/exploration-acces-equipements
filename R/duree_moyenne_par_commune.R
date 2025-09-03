@@ -7,7 +7,7 @@ library(classInt)
 # URL data.gouv pour travail à la volée
 url <- "https://static.data.gouv.fr/resources/donnees-sur-la-localisation-et-lacces-de-la-population-aux-equipements/20250715-113610/donnees-2024-reg52.parquet"
 fond <- "input/commune_reg_52_2025.gpkg"
-output <- "html/duree_moyenne_par_commune.geojson"
+output <- "html/duree_moyenne_par_commune/duree_moyenne_par_commune.geojson"
 
 # Conf duckdb -------------------------------------------------------------
 conn <- DBI::dbConnect(drv = duckdb())

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<!-- Structure de page reprise de "Carte facile" IGN -->
+<!-- https://fab-geocommuns.github.io/carte-facile-site/fr/documentation/exemples/carte-simple-maplibre-cdn/ -->
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Durée moyenne d'accès à un médecin par commune</title>
+
+    <!-- Importation des bibliothèques MapLibre GL JS -->
+    <link href="https://unpkg.com/maplibre-gl@^5.2.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@^5.2.0/dist/maplibre-gl.js"></script>
+
+    <!-- Importation des bibliothèques Carte Facile -->
+    <link href="https://unpkg.com/carte-facile@^0.7.1/dist/carte-facile.css" rel="stylesheet" />
+    <script src="https://unpkg.com/carte-facile@^0.7.1/dist/carte-facile.js"></script>
+
+    <!-- Style pour afficher la carte en plein écran -->
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            width: 100%;
+            margin: 0
+        }
+
+        #map {
+            background: #65a0ba;
+            background: radial-gradient(circle, rgba(101, 160, 186, 1) 30%, rgba(11, 47, 71, 1) 80%)
+        }
+    </style>
+</head>
+<style>
+    /* permet de définir les caractéristiques de la légende, on pourrait l'intégrer dans un fichier à part css*/
+    .legend {
+        /* caractéristiques principales de la légende*/
+        background: white;
+        /*fond de carte*/
+        padding: 10px;
+        /*espace autour de la légende*/
+        font-family: sans-serif;
+        /*police*/
+        font-size: 12px;
+        /*taille police*/
+        color: #333;
+        /*couleur police*/
+        border-radius: 4px;
+        /*coin arrondi*/
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        /*couleur ombre de la carte*/
+        position: absolute;
+        /*position absolue de la légende*/
+        top: 30px;
+        /*décalage de 30 pixel depuis le haut*/
+        left: 10px;
+        /*décalage de 10 pixel depuis la gauche*/
+        z-index: 1;
+        /*pour dire que la légende est au dessus de la carte et donc visible*/
+    }
+
+    .legend h4 {
+        /*titre de la légende*/
+        margin: 0 0 10px;
+        /*supprime la marge au dessus du titre, mais ajoute 10 pixel en dessous*/
+    }
+
+    .legend div {
+        /*cible les lignes de la légende */
+        display: flex;
+        /*affiche le carré de couleur + libellé sur la même ligne*/
+        align-items: center;
+        /*aligner au centre verticalement*/
+        margin-bottom: 5px;
+        /*espace entre chaque ligne*/
+    }
+
+    .legend span {
+        /*cible le carré qui contient les couleurs*/
+        display: inline-block;
+        /*donner une taille fixe au carré*/
+        width: 20px;
+        /*largeur du carré*/
+        height: 20px;
+        /*hauteur du carré*/
+        margin-right: 8px;
+        /*espace entre le carré et le texte*/
+        border: 1px solid black;
+    }
+</style>
+
+<body>
+    <!-- Le conteneur de la carte -->
+    <div id="map"></div>
+
+    <!-- Le script qui initialise la carte -->
+    <script>
+        // Création la carte
+        let map = new maplibregl.Map({
+            container: 'map', // id du conteneur de la carte
+            style: CarteFacile.mapStyles.desaturated, // Style de carte
+            minZoom: 1.8, // niveau de zoom minimum (optionnel)
+            maxZoom: 18.9, // niveau de zoom maximum, adapté aux cartes utilisant les données IGN
+            zoom: 7, // niveau de zoom inital (optionnel)
+            center: [-0.392, 47.428], // placement initial de la carte (optionnel) 7.23/
+            hash: true // pour avoir les coordonnées directement dans l'url
+        });
+
+        // Ajout d'un contrôle de navigation
+        map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+        // Ajout d'une échelle
+        map.addControl(new maplibregl.ScaleControl({}));
+
+        map.on('load', () => {
+            map.addSource("data_source", {
+                type: 'geojson',
+                data: 'duree_moyenne_par_commune.geojson'
+            }
+            )
+            // Remplissage
+            map.addLayer({
+                'id': "data_fill",
+                'type': 'fill',
+                'source': 'data_source',
+                'paint': {
+                    'fill-color': [
+                        'step', // step = "par palier" de valeur
+                        ['get', 'duree_moyenne'], // value
+                        // s'arrête ici si <
+                        '#FFE2E2', // R1
+                        4, '#FF848A', // R3
+                        6, '#E91422', // R5
+                        8, '#9E0C16', // R7
+                        10, '#520408' // R8
+                    ],
+                    'fill-opacity': 0.90 // opacité du remplissage par rapport au fond de carte
+                }
+            });
+
+            // Contours
+            map.addLayer({
+                'id': "data_layer",
+                'type': 'line',
+                'source': 'data_source',
+                'paint': {
+                    'line-color': "black",
+                    'line-width': 1
+                }
+            })
+
+             //permet d'afficher un popup avec la valeur de l'indicateur quand on clique sur un zonage
+        map.on('click', 'data_fill', (e) => {
+            new maplibregl.Popup()
+                .setLngLat(e.lngLat) // permet d'afficher le popup en fonction de l'endroit ou on clique
+                .setHTML(`<strong>Commune :</strong> 
+                    ${e.features[0].properties.libelle} 
+                    (${e.features[0].properties.code})
+                    <br>
+                    <strong>Durée moyenne :</strong> ${e.features[0].properties.duree_moyenne}`
+                    )
+                .addTo(map);
+        });
+
+        // gestion pointeur au survol
+        map.on('mouseenter', 'data_fill', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'data_fill', () => {
+            map.getCanvas().style.cursor = '';
+        });
+        })
+    </script>
+
+    <!-- Légende -->
+    <div id="legende" class="legend"> <!-- je créé une légende qui a pour identifiant legend_iris_com -->
+        <h4>Temps d'accès à un médecin (minutes)</h4>
+        <div><span style="background-color: #FFE2E2"></span>moins de 4</div>
+        <div><span style="background-color: #FF848A"></span>4 - 6</div>
+        <div><span style="background-color: #E91422"></span>6 - 8</div>
+        <div><span style="background-color: #9E0C16"></span>8 - 10</div>
+        <div><span style="background-color: #520408"></span>plus de 10</div>
+    </div>
+</body>
+
+</html>
