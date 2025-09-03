@@ -2,6 +2,7 @@ library(dplyr)
 library(duckdb)
 library(sf)
 library(geojsonsf)
+library(classInt)
 
 # URL data.gouv pour travail à la volée
 url <- "https://static.data.gouv.fr/resources/donnees-sur-la-localisation-et-lacces-de-la-population-aux-equipements/20250715-113610/donnees-2024-reg52.parquet"
@@ -37,3 +38,12 @@ duree_moyenne_par_commune_geo <- st_read("input/commune_reg_52_2025.gpkg") %>%
   select(code, libelle, duree_moyenne)
 
 write(sf_geojson(duree_moyenne_par_commune_geo), output)
+
+# Calcul de seuils ---------------------------------------------
+seuils <- classIntervals(
+  duree_moyenne_par_commune_geo$duree_moyenne, 
+  n=5, 
+  style="jenks"
+)
+
+seuils
