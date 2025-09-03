@@ -6,8 +6,8 @@ url <- "https://static.data.gouv.fr/resources/donnees-sur-la-localisation-et-lac
 
 # Conf duckdb -------------------------------------------------------------
 conn <- DBI::dbConnect(drv = duckdb())
-# pour lecture à la volée
-DBI::dbExecute(conn, "LOAD httpfs;")
+# pour lecture à la volée : pas nécessaire?
+# DBI::dbExecute(conn, "LOAD httpfs;")
 data <- conn %>% 
   tbl(paste0("read_parquet('",url,"')"))
 
@@ -19,12 +19,13 @@ nantes <- data %>%
   collect()
 
 # Calcul temps moyen par commune --------------------------------
-tps_moy_44 <- data %>%
-  filter(dep == "44") %>%
+temps_moyen_par_commune <- data %>%
   filter(typeeq_id == "D265") %>%
   select(pop, duree, depcom) %>%
   group_by(depcom) %>%
-  summarise(duree_moyenne = sum(duree * pop, na.rm = TRUE) / sum(pop, na.rm = TRUE)) %>%
+  summarise(
+    duree_moyenne = sum(duree * pop, na.rm = TRUE) / sum(pop, na.rm = TRUE)
+  ) %>%
   collect()
 
 # Nettoyage --------------------------------
