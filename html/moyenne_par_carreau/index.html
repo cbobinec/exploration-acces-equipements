@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<!-- Structure de page reprise de "Carte facile" IGN -->
+<!-- https://fab-geocommuns.github.io/carte-facile-site/fr/documentation/exemples/carte-simple-maplibre-cdn/ -->
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distance d'accès optimal à un collège</title>
+
+    <!-- Importation des bibliothèques MapLibre GL JS -->
+    <link href="https://unpkg.com/maplibre-gl@^5.2.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@^5.2.0/dist/maplibre-gl.js"></script>
+
+    <!-- Importation des bibliothèques Carte Facile -->
+    <link href="https://unpkg.com/carte-facile@^0.7.1/dist/carte-facile.css" rel="stylesheet" />
+    <script src="https://unpkg.com/carte-facile@^0.7.1/dist/carte-facile.js"></script>
+
+    <!-- Style pour afficher la carte en plein écran -->
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            width: 100%;
+            margin: 0
+        }
+
+        #map {
+            background: #65a0ba;
+            background: radial-gradient(circle, rgba(101, 160, 186, 1) 30%, rgba(11, 47, 71, 1) 80%)
+        }
+    </style>
+</head>
+<style>
+    .legend {
+        background: white;
+        padding: 10px;
+        font-family: sans-serif;
+        font-size: 12px;
+        color: #333;
+        border-radius: 4px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        position: absolute;
+        top: 30px;
+        left: 10px;
+        /*pour dire que la légende est au dessus de la carte et donc visible*/
+        z-index: 1;
+    }
+
+    .legend h4 {
+        margin: 0 0 10px;
+    }
+
+    .legend div {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .legend-text {
+        display: inline-block;
+        text-align: right;
+        width: 55px;
+        margin-right: 5px;
+    }
+
+    .legend-color {
+        /*cible le carré qui contient les couleurs*/
+        display: inline-block;
+        width: 50px;
+        height: 20px;
+        margin-right: 5px;
+        border: 1px solid black;
+    }
+</style>
+
+<body>
+    <!-- Le conteneur de la carte -->
+    <div id="map"></div>
+
+    <!-- Le script qui initialise la carte -->
+    <script>
+        // Création la carte
+        let map = new maplibregl.Map({
+            container: 'map', // id du conteneur de la carte
+            style: CarteFacile.mapStyles.desaturated, // Style de carte
+            minZoom: 1.8, // niveau de zoom minimum (optionnel)
+            maxZoom: 18.9, // niveau de zoom maximum, adapté aux cartes utilisant les données IGN
+            zoom: 11, // niveau de zoom inital (optionnel)
+            center: [-1.5423, 47.1978], // placement initial de la carte (optionnel) 7.23/
+            hash: true // pour avoir les coordonnées directement dans l'url
+        });
+
+        // Ajout d'un contrôle de navigation
+        map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+        // Ajout d'une échelle
+        map.addControl(new maplibregl.ScaleControl({}));
+
+        map.on('load', () => {
+            map.addSource("data_source", {
+                type: 'geojson',
+                data: 'moyenne_par_carreau.geojson'
+            }
+            )
+            // Remplissage
+            map.addLayer({
+                'id': "data_fill",
+                'type': 'fill',
+                'source': 'data_source',
+                'paint': {
+                    'fill-color': [
+                        'step', // step = "par palier" de valeur
+                        ['get', 'distance_moyenne'], // value
+                        // s'arrête ici si <
+                        '#FFE2E2', // R1
+                        1000, '#FF848A', // R3
+                        2000, '#E91422', // R5
+                        4000, '#9E0C16', // R7
+                        6000, '#520408' // R8
+                    ],
+                    'fill-opacity': 0.90 // opacité du remplissage par rapport au fond de carte
+                }
+            });
+
+            // Contours
+            map.addLayer({
+                'id': "data_layer",
+                'type': 'line',
+                'source': 'data_source',
+                'paint': {
+                    'line-color': "white",
+                    'line-width': 1
+                }
+            })
+
+             //permet d'afficher un popup avec la valeur de l'indicateur quand on clique sur un zonage
+        map.on('click', 'data_fill', (e) => {
+            new maplibregl.Popup()
+                .setLngLat(e.lngLat) // permet d'afficher le popup en fonction de l'endroit ou on clique
+                .setHTML(`
+                    <strong>Distance moyenne :</strong> ${e.features[0].properties.distance_moyenne}
+                    `
+                    )
+                .addTo(map);
+        });
+
+        // gestion pointeur au survol
+        map.on('mouseenter', 'data_fill', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'data_fill', () => {
+            map.getCanvas().style.cursor = '';
+        });
+        })
+    </script>
+
+    <!-- Légende -->
+    <div id="legende" class="legend"> <!-- je créé une légende qui a pour identifiant legend_iris_com -->
+        <h4>Distance de trajet optimal moyen à un collège (en mètres)</h4>
+        <div>
+            <span class="legend-color" style="background-color: #FFE2E2"></span>
+            <span class="legend-color" style="background-color: #FF848A"></span>
+            <span class="legend-color" style="background-color: #E91422"></span>
+            <span class="legend-color" style="background-color: #9E0C16"></span>
+            <span class="legend-color" style="background-color: #520408"></span>
+    </div>
+        <div>
+            <span class="legend-text">1 000</span>
+            <span class="legend-text">2 000</span>
+            <span class="legend-text">4 000</span>
+            <span class="legend-text">6 000</span>
+    </div>
+</body>
+
+</html>
