@@ -6,7 +6,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Durée moyenne d'accès à un médecin par commune</title>
+    <title>Temps d'accès moyen à un médecin par commune</title>
 
     <!-- Importation des bibliothèques MapLibre GL JS -->
     <link href="https://unpkg.com/maplibre-gl@^5.2.0/dist/maplibre-gl.css" rel="stylesheet" />
@@ -33,59 +33,44 @@
     </style>
 </head>
 <style>
-    /* permet de définir les caractéristiques de la légende, on pourrait l'intégrer dans un fichier à part css*/
     .legend {
-        /* caractéristiques principales de la légende*/
         background: white;
-        /*fond de carte*/
         padding: 10px;
-        /*espace autour de la légende*/
         font-family: sans-serif;
-        /*police*/
         font-size: 12px;
-        /*taille police*/
         color: #333;
-        /*couleur police*/
         border-radius: 4px;
-        /*coin arrondi*/
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-        /*couleur ombre de la carte*/
         position: absolute;
-        /*position absolue de la légende*/
         top: 30px;
-        /*décalage de 30 pixel depuis le haut*/
         left: 10px;
-        /*décalage de 10 pixel depuis la gauche*/
-        z-index: 1;
         /*pour dire que la légende est au dessus de la carte et donc visible*/
+        z-index: 1;
     }
 
     .legend h4 {
-        /*titre de la légende*/
         margin: 0 0 10px;
-        /*supprime la marge au dessus du titre, mais ajoute 10 pixel en dessous*/
     }
 
     .legend div {
-        /*cible les lignes de la légende */
         display: flex;
-        /*affiche le carré de couleur + libellé sur la même ligne*/
         align-items: center;
-        /*aligner au centre verticalement*/
         margin-bottom: 5px;
-        /*espace entre chaque ligne*/
     }
 
-    .legend span {
+    .legend-text {
+        display: inline-block;
+        text-align: right;
+        width: 55px;
+        margin-right: 5px;
+    }
+
+    .legend-color {
         /*cible le carré qui contient les couleurs*/
         display: inline-block;
-        /*donner une taille fixe au carré*/
-        width: 20px;
-        /*largeur du carré*/
+        width: 50px;
         height: 20px;
-        /*hauteur du carré*/
-        margin-right: 8px;
-        /*espace entre le carré et le texte*/
+        margin-right: 5px;
         border: 1px solid black;
     }
 </style>
@@ -158,7 +143,7 @@
                     ${e.features[0].properties.libelle} 
                     (${e.features[0].properties.code})
                     <br>
-                    <strong>Durée moyenne :</strong> ${e.features[0].properties.duree_moyenne}`
+                    <strong>Durée moyenne :</strong> ${Math.round(e.features[0].properties.duree_moyenne)} minutes`
                     )
                 .addTo(map);
         });
@@ -175,12 +160,19 @@
 
     <!-- Légende -->
     <div id="legende" class="legend"> <!-- je créé une légende qui a pour identifiant legend_iris_com -->
-        <h4>Temps d'accès à un médecin (minutes)</h4>
-        <div><span style="background-color: #FFE2E2"></span>moins de 4</div>
-        <div><span style="background-color: #FF848A"></span>4 - 6</div>
-        <div><span style="background-color: #E91422"></span>6 - 8</div>
-        <div><span style="background-color: #9E0C16"></span>8 - 10</div>
-        <div><span style="background-color: #520408"></span>plus de 10</div>
+        <h4>Temps d'accès moyen à un médecin par commune (en minutes)</h4>
+        <div>
+            <span class="legend-color" style="background-color: #FFE2E2"></span>
+            <span class="legend-color" style="background-color: #FF848A"></span>
+            <span class="legend-color" style="background-color: #E91422"></span>
+            <span class="legend-color" style="background-color: #9E0C16"></span>
+            <span class="legend-color" style="background-color: #520408"></span>
+    </div>
+        <div>
+            <span class="legend-text">4</span>
+            <span class="legend-text">6</span>
+            <span class="legend-text">8</span>
+            <span class="legend-text">10</span>
     </div>
 </body>
 
