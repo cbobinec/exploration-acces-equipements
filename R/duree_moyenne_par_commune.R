@@ -30,7 +30,7 @@ duree_moyenne_par_commune <- data %>%
 DBI::dbDisconnect(conn, shutdown = TRUE)
 
 # Fusion avec le fond commune ---------------------------------------------
-duree_moyenne_par_commune_geo <- st_read("input/commune_reg_52_2025.gpkg") %>% 
+duree_moyenne_par_commune_geo <- st_read("input/commune_reg_52_2024.gpkg") %>% 
   st_transform(crs = 4326, "+init=epsg:3035") |> 
   left_join(
     y = duree_moyenne_par_commune,
