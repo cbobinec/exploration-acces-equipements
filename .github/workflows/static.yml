@@ -40,7 +40,7 @@ jobs:
           path: 'html'
       # generate index directory listing
       - name: Github Pages Directory Listing
-      - uses: jayanta525/github-pages-directory-listing@v4.0.0
+        uses: jayanta525/github-pages-directory-listing@v4.0.0
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
