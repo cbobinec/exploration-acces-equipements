@@ -122,7 +122,9 @@
                     ],
                     'fill-opacity': 0.90 // opacité du remplissage par rapport au fond de carte
                 }
-            });
+            },
+            // Pour glisser notre couche sous les toponymes
+        "toponyme - ocs lineaire 3");
 
             // Contours
             map.addLayer({
@@ -133,7 +135,9 @@
                     'line-color': "white",
                     'line-width': 1
                 }
-            })
+            },
+            // Pour glisser notre couche sous les toponymes
+        "toponyme - ocs lineaire 3")
 
              //permet d'afficher un popup avec la valeur de l'indicateur quand on clique sur un zonage
         map.on('click', 'data_fill', (e) => {
