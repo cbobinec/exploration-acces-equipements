@@ -19,7 +19,7 @@ data <- conn %>%
 # Calcul temps moyen par commune --------------------------------
 moyenne_par_carreau <- data %>%
   filter(depcom %in% c("44109", "44143", "44020", "44190", "44009", "44215", "44071", "44198")) %>%
-  filter(typeeq_id == "F307") %>%
+  filter(typeeq_id == "C201") %>%
   select(pop, distance, idSrc) %>%
   group_by(idSrc) %>%
   summarise(
